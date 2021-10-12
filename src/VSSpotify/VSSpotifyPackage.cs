@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
 using SpoifyControl;
@@ -6,6 +7,8 @@ using SpoifyControl;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 using Task = System.Threading.Tasks.Task;
@@ -30,6 +33,7 @@ namespace VSSpotify
     /// </para>
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
+    // We want to be loaded when main window is open, regardless of solution state, ToolboxInitialized is the closest
     [ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
     [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
     [Guid(VSSpotifyPackage.PackageGuidString)]
@@ -58,12 +62,85 @@ namespace VSSpotify
             InitializeSpotifyControl();
         }
 
+        #endregion
+
         private void InitializeSpotifyControl()
         {
-            var spotifyPlayerControl = new SpotifyPlayerControl();
             // Now place it into VS status bar
+            var mainWindow = Application.Current.MainWindow;
+
+            var resizer = FindChild<FrameworkElement>(mainWindow, "ResizeGripControl");
+            if (resizer != null && resizer.Parent is DockPanel docPanel)
+            {
+                var spotifyPlayerControl = new SpotifyPlayerControl();
+                spotifyPlayerControl.SetValue(DockPanel.DockProperty, Dock.Left);
+                docPanel.Children.Add(spotifyPlayerControl);
+            }
+            else
+            {
+                // Can't find VS status bar, try later
+                this.JoinableTaskFactory.RunAsync(async () =>
+                {
+                    await Task.Delay(2000);
+                    await this.JoinableTaskFactory.SwitchToMainThreadAsync(this.DisposalToken);
+                    InitializeSpotifyControl();
+                }).FileAndForget("vs/spotify/failure");
+            }
         }
 
-        #endregion
+        /// <summary>
+        /// Looks for a child control within a parent by name
+        /// </summary>
+        public static T FindChild<T>(DependencyObject parent, string childName)
+        where T : DependencyObject
+        {
+            // Confirm parent and childName are valid.
+            if (parent == null) return null;
+
+            T foundChild = null;
+
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                // If the child is not of the request child type child
+                T childType = child as T;
+                if (childType == null)
+                {
+                    // recursively drill down the tree
+                    foundChild = FindChild<T>(child, childName);
+
+                    // If the child is found, break so we do not overwrite the found child.
+                    if (foundChild != null) break;
+                }
+                else if (!string.IsNullOrEmpty(childName))
+                {
+                    var frameworkElement = child as FrameworkElement;
+                    // If the child's name is set for search
+                    if (frameworkElement != null && frameworkElement.Name == childName)
+                    {
+                        // if the child's name is of the request name
+                        foundChild = (T)child;
+                        break;
+                    }
+                    else
+                    {
+                        // recursively drill down the tree
+                        foundChild = FindChild<T>(child, childName);
+
+                        // If the child is found, break so we do not overwrite the found child.
+                        if (foundChild != null) break;
+                    }
+                }
+                else
+                {
+                    // child element found.
+                    foundChild = (T)child;
+                    break;
+                }
+            }
+
+            return foundChild;
+        }
     }
 }
