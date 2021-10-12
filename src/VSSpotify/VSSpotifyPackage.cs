@@ -55,10 +55,10 @@ namespace VSSpotify
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            InitializeSpotidyControl();
+            InitializeSpotifyControl();
         }
 
-        private void InitializeSpotidyControl()
+        private void InitializeSpotifyControl()
         {
             var spotifyPlayerControl = new SpotifyPlayerControl();
             // Now place it into VS status bar
