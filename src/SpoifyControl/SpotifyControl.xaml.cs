@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using SpotifyAPI.Web;
 
 namespace SpoifyControl
 {
@@ -20,9 +23,18 @@ namespace SpoifyControl
     /// </summary>
     public partial class SpotifyPlayerControl : UserControl
     {
+
         public SpotifyPlayerControl()
         {
             InitializeComponent();
+            TestSpotify().ConfigureAwait(false);
+        }
+
+        private async Task TestSpotify()
+        {
+            var client = await new SpotifyClientFactory("CLIENT_ID_HERE").GetClientAsync();
+            var profile = await client.UserProfile.Current();
+            Console.WriteLine(profile.DisplayName);
         }
     }
 }

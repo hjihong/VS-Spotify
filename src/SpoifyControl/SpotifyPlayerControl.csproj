@@ -70,6 +70,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="SpotifyClientFactory.cs" />
     <Compile Include="SpotifyControl.xaml.cs">
       <DependentUpon>SpotifyControl.xaml</DependentUpon>
       <SubType>Code</SubType>
