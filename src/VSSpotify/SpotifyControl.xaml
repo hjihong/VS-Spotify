@@ -7,6 +7,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Button Click="Button_Click">Sign In</Button>
+        <StatusBar HorizontalAlignment="Right" VerticalAlignment="Stretch">
+            <Button x:Name="SignInButton" Click="SignInButton_Click">Sign In</Button>
+            <Button x:Name="Previous" Click="Previous_Click">Previous</Button>
+            <Button x:Name="PlayButton" Click="PlayButton_Click">Play</Button>
+            <Button x:Name="NextButton" Click="NextButton_Click">Next</Button>
+            <Button x:Name="SongTitleButton" Click="SongTitleButton_Click">Song Title</Button>
+            <Button x:Name="MuteButton" Click="MuteButton_Click">Mute</Button>
+        </StatusBar>
     </Grid>
 </UserControl>

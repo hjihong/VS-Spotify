@@ -36,5 +36,35 @@ namespace VSSpotify
         {
             var _ = TestSpotifyAsync().ConfigureAwait(false);
         }
+
+        private void PlayButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SignInButton_Click(object sender, RoutedEventArgs e)
+        { 
+
+        }
+
+        private void Previous_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void NextButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SongTitleButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MuteButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
