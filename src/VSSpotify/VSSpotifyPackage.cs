@@ -1,16 +1,11 @@
-﻿using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-
-using SpoifyControl;
-
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 
 namespace VSSpotify
@@ -72,7 +67,7 @@ namespace VSSpotify
             var resizer = FindChild<FrameworkElement>(mainWindow, "ResizeGripControl");
             if (resizer != null && resizer.Parent is DockPanel docPanel)
             {
-                var spotifyPlayerControl = new SpotifyPlayerControl();
+                var spotifyPlayerControl = new SpotifyControl();
                 spotifyPlayerControl.SetValue(DockPanel.DockProperty, Dock.Left);
                 docPanel.Children.Add(spotifyPlayerControl);
             }
