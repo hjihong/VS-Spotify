@@ -24,6 +24,33 @@ namespace VSSpotify
     public partial class SpotifyControl : UserControl, INotifyPropertyChanged
     {
         private bool isAuthenticated = false;
+        private bool isPaused = false;
+
+        public bool IsAuthenticated
+        {
+            get
+            {
+                return isAuthenticated;
+            }
+            private set
+            {
+                isAuthenticated = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
+            }
+        }
+
+        public bool IsPaused
+        {
+            get
+            {
+                return isPaused;
+            }
+            private set
+            {
+                isPaused = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPaused)));
+            }
+        }
 
         public SpotifyControl()
         {
@@ -32,14 +59,23 @@ namespace VSSpotify
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        
+
         private async void PlayButton_Click(object sender, RoutedEventArgs e)
         {
             try
-            {
-                var client = await new SpotifyClientFactory().GetClientAsync();
-                var profile = await client.UserProfile.Current();
-                Console.WriteLine(profile.DisplayName);
+            { 
+                if (isPaused)
+                {
+                    // call Play method
+                }
+                else
+                {
+                    // call pause method
+                }
+                IsPaused = !IsPaused;
+                //var client = await new SpotifyClientFactory().GetClientAsync();
+                //var profile = await client.UserProfile.Current();
+                //Console.WriteLine(profile.DisplayName);
             }
             catch (Exception ex)
             {
@@ -69,19 +105,6 @@ namespace VSSpotify
             catch (Exception ex)
             {
                 await Console.Error.WriteLineAsync(ex.Message);
-            }
-        }
-
-        public bool IsAuthenticated
-        {
-            get
-            {
-                return isAuthenticated;
-            }
-            private set
-            {
-                isAuthenticated = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
             }
         }
 
