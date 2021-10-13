@@ -39,7 +39,7 @@ namespace VSSpotify
 
         public bool IsAuthenticated()
         {
-            return AccessToken != null && TokenExpiry > DateTimeOffset.Now;
+            return !string.IsNullOrEmpty(AccessToken) && TokenExpiry > DateTimeOffset.Now;
         }
 
         public void ClearCredentials()
