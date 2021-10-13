@@ -43,7 +43,7 @@ namespace VSSpotify
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex.Message);
+                await Console.Error.WriteLineAsync(ex.Message);
             }
         }
 
@@ -67,7 +67,7 @@ namespace VSSpotify
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex.Message);
+                await Console.Error.WriteLineAsync(ex.Message);
             }
         }
 
@@ -86,7 +86,7 @@ namespace VSSpotify
 
         }
 
-        private void MuteButton_Click(object sender, RoutedEventArgs e)
+        private void VolumeButton_Click(object sender, RoutedEventArgs e)
         {
 
         }
