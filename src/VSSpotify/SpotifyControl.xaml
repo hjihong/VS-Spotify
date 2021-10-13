@@ -3,17 +3,54 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vsui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+             xmlns:utilities="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+             xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
+             xmlns:imageCatalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
+             xmlns:theming="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Imaging"
              xmlns:local="clr-namespace:VSSpotify"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <StatusBar HorizontalAlignment="Right" VerticalAlignment="Stretch">
-            <Button x:Name="SignInButton" Click="SignInButton_Click">Sign In</Button>
-            <Button x:Name="Previous" Click="Previous_Click">Previous</Button>
-            <Button x:Name="PlayButton" Click="PlayButton_Click">Play</Button>
-            <Button x:Name="NextButton" Click="NextButton_Click">Next</Button>
+             d:DesignHeight="450" d:DesignWidth="800"
+             DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+    <UserControl.Resources>
+        <utilities:BrushToColorConverter x:Key="BrushToColorConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <local:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="3" />
+        </Style>
+    </UserControl.Resources>
+    <Grid Background="Transparent" >
+        <StatusBar Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Stretch">
+            
+            <!-- Sign in and sign out buttons -->
+            <Button x:Name="SignInButton" Click="SignInButton_Click"  theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <imaging:CrispImage Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.AddUser}"/>
+                    <imaging:CrispImage Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.InUseByOtherUser}"/>
+                </StackPanel>
+            </Button>
+
+            <!-- Playback buttons -->
+            <Button x:Name="PreviousButton" Click="Previous_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.PreviousFrame}"/>
+            </Button>
+            <Button x:Name="PlayButton" Click="PlayButton_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Play}" />
+            </Button>
+            <Button x:Name="NextButton" Click="NextButton_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.NextFrame}" />
+            </Button>
+            
             <Button x:Name="SongTitleButton" Click="SongTitleButton_Click">Song Title</Button>
-            <Button x:Name="MuteButton" Click="MuteButton_Click">Mute</Button>
+            
+            <Button x:Name="VolumeButton" Click="VolumeButton_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Volume}" />
+            </Button>
         </StatusBar>
     </Grid>
 </UserControl>

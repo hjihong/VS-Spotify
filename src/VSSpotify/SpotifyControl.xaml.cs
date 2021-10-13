@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,18 +20,20 @@ namespace VSSpotify
     /// <summary>
     /// Interaction logic for SpotifyControl.xaml
     /// </summary>
-    public partial class SpotifyControl : UserControl
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
+    public partial class SpotifyControl : UserControl, INotifyPropertyChanged
     {
-        public bool IsAuthenticated { get; private set; } = false;
         public bool isPaused { get; private set; } = false; //right after we authenticate, we will get corrrect value
+        private bool isAuthenticated = false;
 
         public SpotifyControl()
         {
             InitializeComponent();
             IsAuthenticated = new SpotifyAuthManager().IsAuthenticated();
-
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+        
         private async void PlayButton_Click(object sender, RoutedEventArgs e)
         {
             //logic:
@@ -71,9 +74,8 @@ namespace VSSpotify
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex.Message);
+                await Console.Error.WriteLineAsync(ex.Message);
                 System.Diagnostics.Debug.WriteLine("ERROR: " + ex.Message);
-                //Console.Error.WriteLine("ERROR WITH PLAYBUTTONCLICK");
             }
         }
 
@@ -85,20 +87,33 @@ namespace VSSpotify
                 {
                     if (IsAuthenticated)
                     {
-                        authManager.ClearCredentials();
+                        // authManager.ClearCredentials();
                         IsAuthenticated = false;
                     }
                     else
                     {
-                        await authManager.GetCredentialsAsync();
-                        IsAuthenticated = authManager.IsAuthenticated();
+                        // await authManager.GetCredentialsAsync();
+                        // IsAuthenticated = !authManager.IsAuthenticated();
+                        IsAuthenticated = true;
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex.Message);
-                //Console.Error.WriteLine("ERROR WITH SIGNIN");
+                await Console.Error.WriteLineAsync(ex.Message);
+            }
+        }
+
+        public bool IsAuthenticated
+        {
+            get
+            {
+                return isAuthenticated;
+            }
+            private set
+            {
+                isAuthenticated = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
             }
         }
 
@@ -160,7 +175,7 @@ namespace VSSpotify
             }
         }
 
-        private async void MuteButton_Click(object sender, RoutedEventArgs e)
+        private void VolumeButton_Click(object sender, RoutedEventArgs e)
         {
             if (IsAuthenticated)
             {
