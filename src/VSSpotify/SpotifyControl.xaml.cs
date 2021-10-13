@@ -23,51 +23,43 @@ namespace VSSpotify
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
     public partial class SpotifyControl : UserControl, INotifyPropertyChanged
     {
-        public bool isPaused { get; private set; } = false; //right after we authenticate, we will get corrrect value
         private bool isAuthenticated = false;
+        private bool isPaused = true; //right after we authenticate, we will get corrrect value
 
         public SpotifyControl()
         {
             InitializeComponent();
             IsAuthenticated = new SpotifyAuthManager().IsAuthenticated();
+            IsPaused = new SpotifyAuthManager().IsPaused();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
         
+        //This function covers both the play and pause buttons. 
         private async void PlayButton_Click(object sender, RoutedEventArgs e)
-        {
-            //logic:
-            //func covers pause and play 
-            //if pause = true then change to false and play music POST 
-            //if pause = false then change to true and pause music POST
-
-            //combining the play button api and the pause button api 
+        { 
             System.Diagnostics.Debug.WriteLine("BUTTON WAS CLICKED AND HITTING METHOD");
             try
             {
                 var client = await new SpotifyClientFactory().GetClientAsync();
-                System.Diagnostics.Debug.WriteLine("IN TRY STATEMENT: " + client.Player.GetCurrentPlayback()); //debugging
+                //System.Diagnostics.Debug.WriteLine("IN TRY STATEMENT: " + client.Player.GetCurrentPlayback()); //debugging
 
                 if (IsAuthenticated)
                 {
                     //var client = await new SpotifyClientFactory().GetClientAsync();
-
-                    if (isPaused)
+                    if (!isPaused) //should be true
                     {
-                        System.Diagnostics.Debug.WriteLine("In if");
-                        //Tell api to actually play the song 
-                        var resumePlayback = await client.Player.ResumePlayback();
-                        System.Diagnostics.Debug.WriteLine("Pause playback: " + resumePlayback.ToString()); //debugging
+                        System.Diagnostics.Debug.WriteLine("In if"); 
+                        var resumePlayback = await client.Player.PausePlayback();//ERROR WITH THIS LINE
+                        System.Diagnostics.Debug.WriteLine("Pause playback: " + client.Player.PausePlayback()); //debugging
                         isPaused = false;
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine("In else");
-                        //Tell api to pause the song 
-                        Task<bool> pausePlayback = client.Player.PausePlayback();
-                        System.Diagnostics.Debug.WriteLine("Resume playback: " + pausePlayback.ToString()); //debugged 
-                        isPaused = true;
-
+                        System.Diagnostics.Debug.WriteLine("In else");  
+                        var pausePlayback = await client.Player.ResumePlayback(); //ERROR WITH THIS LINE
+                        System.Diagnostics.Debug.WriteLine("Resume playback: " + client.Player.ResumePlayback()); //debugged 
+                        isPaused = true; 
                     }
 
                 }
@@ -87,13 +79,13 @@ namespace VSSpotify
                 {
                     if (IsAuthenticated)
                     {
-                        // authManager.ClearCredentials();
+                        authManager.ClearCredentials();
                         IsAuthenticated = false;
                     }
                     else
                     {
-                        // await authManager.GetCredentialsAsync();
-                        // IsAuthenticated = !authManager.IsAuthenticated();
+                        _ = authManager.GetCredentialsAsync();
+                        IsAuthenticated = !authManager.IsAuthenticated();
                         IsAuthenticated = true;
                     }
                 }
@@ -114,6 +106,19 @@ namespace VSSpotify
             {
                 isAuthenticated = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
+            }
+        }
+
+        public bool IsPaused
+        {
+            get
+            {
+                return isPaused;
+            }
+            private set
+            {
+                isPaused = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPaused)));
             }
         }
 

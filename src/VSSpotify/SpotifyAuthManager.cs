@@ -48,10 +48,11 @@ namespace VSSpotify
         }
 
 
-       // public bool IsPaused()
-        //{
-        //    return ! ;
-        //}
+       public bool IsPaused()
+       {
+            return true; 
+            //TODO: fix this. I am not sure how it should be defined. 
+       }
 
         public async Task<string> GetCredentialsAsync()
         {
