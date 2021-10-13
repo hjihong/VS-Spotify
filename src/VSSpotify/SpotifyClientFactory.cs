@@ -18,10 +18,11 @@ namespace VSSpotify
     {
         public async Task<SpotifyClient> GetClientAsync()
         {
-            var authManager = new SpotifyAuthManager();
-            var creds = await authManager.GetCredentialsAsync();
-
-            return new SpotifyClient(creds);
+            using (var authManager = new SpotifyAuthManager())
+            {
+                var creds = await authManager.GetCredentialsAsync();
+                return new SpotifyClient(creds);
+            }
         }
     }
 }

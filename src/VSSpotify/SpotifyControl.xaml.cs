@@ -51,17 +51,18 @@ namespace VSSpotify
         {
             try
             {
-                var authManager = new SpotifyAuthManager();
-
-                if (IsAuthenticated)
+                using (var authManager = new SpotifyAuthManager())
                 {
-                    authManager.ClearCredentials();
-                    IsAuthenticated = false;
-                }
-                else
-                {
-                    await authManager.GetCredentialsAsync();
-                    IsAuthenticated = authManager.IsAuthenticated();
+                    if (IsAuthenticated)
+                    {
+                        authManager.ClearCredentials();
+                        IsAuthenticated = false;
+                    }
+                    else
+                    {
+                        await authManager.GetCredentialsAsync();
+                        IsAuthenticated = authManager.IsAuthenticated();
+                    }
                 }
             }
             catch (Exception ex)

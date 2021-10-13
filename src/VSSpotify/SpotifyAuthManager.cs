@@ -28,8 +28,8 @@ namespace VSSpotify
 
         private DateTimeOffset TokenExpiry
         {
-            get => DateTimeOffset.TryParse(_cache.ContainsKey(PKCE_EXPIRY_KEY) ? _cache[PKCE_EXPIRY_KEY] : string.Empty, out var expiry) ? expiry : DateTimeOffset.MinValue;
-            set => _cache[PKCE_EXPIRY_KEY] = value.UtcDateTime.ToString();
+            get => DateTimeOffset.TryParse(_cache.ContainsKey(PKCE_EXPIRY_KEY) ? _cache[PKCE_EXPIRY_KEY] : "", out var expiry) ? expiry : DateTimeOffset.MinValue;
+            set => _cache[PKCE_EXPIRY_KEY] = value.ToString();
         }
 
         public SpotifyAuthManager()
@@ -44,8 +44,7 @@ namespace VSSpotify
 
         public void ClearCredentials()
         {
-            _cache.Remove(PKCE_ACCESS_TOKEN_KEY);
-            _cache.Remove(PKCE_REFRESH_TOKEN_KEY);
+            _cache.Clear();
         }
 
         public async Task<string> GetCredentialsAsync()

@@ -11,7 +11,7 @@ namespace VSSpotify
 {
     internal class TempDictionary : IDictionary<string, string>, IDisposable
     {
-        private readonly string _cachePath = $"{Path.GetTempPath()}{Path.PathSeparator}VS_SPOTIFY.json";
+        private readonly string _cachePath = $"{Path.GetTempPath()}{Path.DirectorySeparatorChar}VS_SPOTIFY.json";
 
         private IDictionary<string, string> _cache;
         private IDictionary<string, string> Cache
@@ -24,11 +24,13 @@ namespace VSSpotify
                     {
                         _cache = new Dictionary<string, string>();
                     }
-
-                    using (var reader = File.OpenText(_cachePath))
+                    else
                     {
-                        var serializer = new JsonSerializer();
-                        _cache = (Dictionary<string, string>)serializer.Deserialize(reader, typeof(Dictionary<string, string>));
+                        using (var reader = File.OpenText(_cachePath))
+                        {
+                            var serializer = new JsonSerializer();
+                            _cache = (Dictionary<string, string>)serializer.Deserialize(reader, typeof(Dictionary<string, string>));
+                        }
                     }
                 }
 
