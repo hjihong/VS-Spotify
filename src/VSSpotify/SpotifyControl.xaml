@@ -26,12 +26,16 @@
     </UserControl.Resources>
     <Grid Background="Transparent" >
         <StatusBar Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Stretch">
-            <Button x:Name="SignInButton" Click="SignInButton_Click" Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
-                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.AddUser}"/>
+            
+            <!-- Sign in and sign out buttons -->
+            <Button x:Name="SignInButton" Click="SignInButton_Click"  theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <imaging:CrispImage Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.AddUser}"/>
+                    <imaging:CrispImage Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.InUseByOtherUser}"/>
+                </StackPanel>
             </Button>
-            <Button x:Name="SignOutButton" Click="SignInButton_Click" Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
-                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.InUseByOtherUser}"/>
-            </Button>
+
+            <!-- Playback buttons -->
             <Button x:Name="PreviousButton" Click="Previous_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.PreviousFrame}"/>
             </Button>
@@ -41,7 +45,9 @@
             <Button x:Name="NextButton" Click="NextButton_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.NextFrame}" />
             </Button>
+            
             <Button x:Name="SongTitleButton" Click="SongTitleButton_Click">Song Title</Button>
+            
             <Button x:Name="VolumeButton" Click="VolumeButton_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Volume}" />
             </Button>
