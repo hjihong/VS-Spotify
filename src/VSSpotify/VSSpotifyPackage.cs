@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -38,7 +39,6 @@ namespace VSSpotify
         /// VSSpotifyPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "544391b2-7a44-4862-9ee7-c33f32b426ca";
-
         #region Package Members
 
         /// <summary>
@@ -53,6 +53,7 @@ namespace VSSpotify
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            await base.InitializeAsync(cancellationToken, progress);
 
             InitializeSpotifyControl();
         }
