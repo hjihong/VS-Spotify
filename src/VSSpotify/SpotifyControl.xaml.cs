@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,20 +20,19 @@ namespace VSSpotify
     /// <summary>
     /// Interaction logic for SpotifyControl.xaml
     /// </summary>
-    public partial class SpotifyControl : UserControl
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
+    public partial class SpotifyControl : UserControl, INotifyPropertyChanged
     {
-        public bool IsAuthenticated { get; private set; } = false;
+        private bool isNotAuthenticated = true;
 
         public SpotifyControl()
         {
             InitializeComponent();
-            IsAuthenticated = new SpotifyAuthManager().IsAuthenticated();
+            isNotAuthenticated = !(new SpotifyAuthManager().IsAuthenticated());
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
+        public event PropertyChangedEventHandler PropertyChanged;
+        
         private async void PlayButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -53,21 +53,35 @@ namespace VSSpotify
             {
                 using (var authManager = new SpotifyAuthManager())
                 {
-                    if (IsAuthenticated)
+                    if (!IsNotAuthenticated)
                     {
                         authManager.ClearCredentials();
-                        IsAuthenticated = false;
+                        IsNotAuthenticated = true;
                     }
                     else
                     {
                         await authManager.GetCredentialsAsync();
-                        IsAuthenticated = authManager.IsAuthenticated();
+                        IsNotAuthenticated = !authManager.IsAuthenticated();
+                        IsNotAuthenticated = false;
                     }
                 }
             }
             catch (Exception ex)
             {
                 await Console.Error.WriteLineAsync(ex.Message);
+            }
+        }
+
+        public bool IsNotAuthenticated
+        {
+            get
+            {
+                return isNotAuthenticated;
+            }
+            private set
+            {
+                isNotAuthenticated = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsNotAuthenticated)));
             }
         }
 
