@@ -23,12 +23,12 @@ namespace VSSpotify
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
     public partial class SpotifyControl : UserControl, INotifyPropertyChanged
     {
-        private bool isNotAuthenticated = true;
+        private bool isAuthenticated = false;
 
         public SpotifyControl()
         {
             InitializeComponent();
-            isNotAuthenticated = !(new SpotifyAuthManager().IsAuthenticated());
+            isAuthenticated = new SpotifyAuthManager().IsAuthenticated();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -53,16 +53,16 @@ namespace VSSpotify
             {
                 using (var authManager = new SpotifyAuthManager())
                 {
-                    if (!IsNotAuthenticated)
+                    if (IsAuthenticated)
                     {
-                        authManager.ClearCredentials();
-                        IsNotAuthenticated = true;
+                        // authManager.ClearCredentials();
+                        IsAuthenticated = false;
                     }
                     else
                     {
-                        await authManager.GetCredentialsAsync();
-                        IsNotAuthenticated = !authManager.IsAuthenticated();
-                        IsNotAuthenticated = false;
+                        // await authManager.GetCredentialsAsync();
+                        // IsAuthenticated = !authManager.IsAuthenticated();
+                        IsAuthenticated = true;
                     }
                 }
             }
@@ -72,16 +72,16 @@ namespace VSSpotify
             }
         }
 
-        public bool IsNotAuthenticated
+        public bool IsAuthenticated
         {
             get
             {
-                return isNotAuthenticated;
+                return isAuthenticated;
             }
             private set
             {
-                isNotAuthenticated = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsNotAuthenticated)));
+                isAuthenticated = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
             }
         }
 

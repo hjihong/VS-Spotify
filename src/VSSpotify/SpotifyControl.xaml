@@ -15,6 +15,7 @@
     <UserControl.Resources>
         <utilities:BrushToColorConverter x:Key="BrushToColorConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <local:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
 
         <Style TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
@@ -25,9 +26,11 @@
     </UserControl.Resources>
     <Grid Background="Transparent" >
         <StatusBar Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Stretch">
-            <Button x:Name="SignInButton" Click="SignInButton_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
-                <imaging:CrispImage Visibility="{Binding IsNotAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.AddUser}"/>
-                <!--<imaging:CrispImage Visibility="" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.AddUser}"/>-->
+            <Button x:Name="SignInButton" Click="SignInButton_Click" Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.AddUser}"/>
+            </Button>
+            <Button x:Name="SignOutButton" Click="SignInButton_Click" Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.InUseByOtherUser}"/>
             </Button>
             <Button x:Name="PreviousButton" Click="Previous_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.PreviousFrame}"/>
