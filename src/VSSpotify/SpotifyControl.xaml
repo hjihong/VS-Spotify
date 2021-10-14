@@ -38,19 +38,23 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource {x:Static vsui:EnvironmentColors.ScrollBarArrowMouseOverBackgroundBrushKey}}" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <SolidColorBrush Color="White" Opacity="0.2" />
+                        </Setter.Value>
+                    </Setter>
                 </Trigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid Name="RootControl" Background="{DynamicResource {x:Static vsui:EnvironmentColors.StatusBarDefaultBrushKey}}" 
-          theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+    <Grid Name="RootControl" Background="Transparent" 
+          theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DockPanel}}, Converter={StaticResource BrushToColorConverter}}">
         <StatusBar Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Stretch" Padding="0" Margin="0">
             <!-- Sign in and sign out buttons -->
-            <Button x:Name="SignInButton" Click="SignInButton_Click" ToolTip="Spotify Sign In/Out">
+            <Button x:Name="SignInButton" Click="SignInButton_Click">
                 <StackPanel Orientation="Horizontal">
-                    <imaging:CrispImage Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.AddUser}"/>
-                    <imaging:CrispImage Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.InUseByOtherUser}"/>
+                    <imaging:CrispImage Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.AddUser}" ToolTip="Spotify Sign In"/>
+                    <imaging:CrispImage Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Exit}" ToolTip="Spotify Sign Out"/>
                 </StackPanel>
             </Button>
 
@@ -64,11 +68,11 @@
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.PreviousFrame}"
                                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </Button>
-            <Button x:Name="PlayButton" Click="PlayButton_Click" ToolTip="Spotify Play/Pause"
+            <Button x:Name="PlayButton" Click="PlayButton_Click"
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
-                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Pause}"/>
-                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Play}"/>
+                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Pause}" ToolTip="Spotify Pause"/>
+                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Play}" ToolTip="Spotify Play"/>
                 </StackPanel>
             </Button>
             <Button x:Name="NextButton" Click="NextButton_Click" ToolTip="Spotify Play Next Song"
@@ -78,8 +82,7 @@
 
             <Button x:Name="SongTitleButton" Click="SongTitleButton_Click" MinWidth="50" 
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Foreground="{DynamicResource {x:Static vsui:ThemedDialogColors.WindowPanelTextBrushKey}}"
-                    Background="{DynamicResource {x:Static vsui:EnvironmentColors.ToolWindowBackgroundBrushKey}}" 
+                    Foreground="{DynamicResource {x:Static vsui:EnvironmentColors.StatusBarTextBrushKey}}"
                     Content="{Binding CurrentlyPlayingItemTitle, Mode=OneWay}"/>
             <Button x:Name="VolumeButton" Click="VolumeButton_Click" ToolTip="Spotify Mute/Unmute"
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
