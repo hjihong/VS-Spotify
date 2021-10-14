@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,6 +24,8 @@ namespace VSSpotify
         private string currentlyPlayingItemTitle;
         private readonly JoinableTaskFactory joinableTaskFactory;
         private readonly VSSpotifyPackage package;
+        private Timer refreshTimer;
+        private bool isVisualStudioActivated;
 
         public bool IsAuthenticated
         {
@@ -37,13 +40,23 @@ namespace VSSpotify
                     isAuthenticated = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
 
-                    if (!isAuthenticated)
+                    if (isAuthenticated)
+                    {
+                        OnUserSignedIn();
+                    }
+                    else
                     {
                         // User just signed out, clean up controls
                         OnUserSignedOut();
                     }
                 }
             }
+        }
+
+        private void OnUserSignedIn()
+        {
+            // User just logged in, refresh controls
+            BeginControlRefresh(state: null);
         }
 
         private void OnUserSignedOut()
@@ -90,16 +103,44 @@ namespace VSSpotify
 
             InitializeComponent();
 
-            // Start a loop of refreshing controls
-            this.joinableTaskFactory.RunAsync(async () =>
-            {
-                while (!this.package.DisposalToken.IsCancellationRequested)
-                {
-                    await RefreshControlsAsync();
-                    await Task.Delay(1000);
-                }
+            // Kick in initial refresh
+            this.refreshTimer = new Timer(BeginControlRefresh, state: null, dueTime:0, Timeout.Infinite);
 
-            }).FileAndForget("vs/spotify/failure");
+            Application.Current.Activated += OnApplicationActivated;
+            Application.Current.Deactivated += OnApplicationDeactivated;
+        }
+
+        private void BeginControlRefresh(object state)
+        {
+            if (this.isAuthenticated && isVisualStudioActivated && !this.package.DisposalToken.IsCancellationRequested)
+            {
+
+                this.joinableTaskFactory.RunAsync(async () =>
+                {
+                    if (!this.package.DisposalToken.IsCancellationRequested)
+                    {
+                        await RefreshControlsAsync();
+                    }
+
+                // If user is authenticated and VS is active, tick again in 5s
+                if (this.isVisualStudioActivated && this.IsAuthenticated)
+                    {
+                        this.refreshTimer.Change(dueTime: 5000, period: Timeout.Infinite);
+                    }
+
+                }).FileAndForget("vs/spotify/failure");
+            }
+        }
+
+        private void OnApplicationDeactivated(object sender, EventArgs e)
+        {
+            this.isVisualStudioActivated = false;
+        }
+
+        private void OnApplicationActivated(object sender, EventArgs e)
+        {
+            this.isVisualStudioActivated = true;
+            BeginControlRefresh(state: null);
         }
 
         private async Task RefreshControlsAsync()
