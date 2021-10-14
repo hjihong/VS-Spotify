@@ -14,6 +14,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Threading;
+using SpotifyAPI.Web;
 
 namespace VSSpotify
 {
@@ -25,6 +28,9 @@ namespace VSSpotify
     {
         private bool isAuthenticated = false;
         private bool isPaused = false;
+        private string currentlyPlayingItemTitle;
+        private readonly JoinableTaskFactory joinableTaskFactory;
+        private readonly VSSpotifyPackage package;
 
         public bool IsAuthenticated
         {
@@ -38,8 +44,19 @@ namespace VSSpotify
                 {
                     isAuthenticated = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
+                    
+                    if (!isAuthenticated)
+                    {
+                        // User just signed out, clean up controls
+                        OnUserSignedOut();
+                    }
                 }
             }
+        }
+
+        private void OnUserSignedOut()
+        {
+            this.CurrentlyPlayingItemTitle = "";
         }
 
         public bool IsPaused
@@ -58,12 +75,66 @@ namespace VSSpotify
             }
         }
 
-        public SpotifyControl()
+        public string CurrentlyPlayingItemTitle
         {
+            get
+            {
+                return currentlyPlayingItemTitle;
+            }
+            private set
+            {
+                if (currentlyPlayingItemTitle != value)
+                {
+                    currentlyPlayingItemTitle = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentlyPlayingItemTitle)));
+                }
+            }
+        }
+
+        public SpotifyControl(JoinableTaskFactory joinableTaskFactory, VSSpotifyPackage package)
+        {
+            this.joinableTaskFactory = joinableTaskFactory;
+            this.package = package;
+
             InitializeComponent();
             using (var authManager = new SpotifyAuthManager())
             {
                 IsAuthenticated = authManager.IsAuthenticated();
+            }
+
+            // Start a loop of refreshing controls
+            this.joinableTaskFactory.RunAsync(async () =>
+            {
+                while (!this.package.DisposalToken.IsCancellationRequested)
+                {
+                    await RefreshControlsAsync();
+                    await Task.Delay(1000);
+                }
+
+            }).FileAndForget("vs/spotify/failure");
+        }
+
+        private async Task RefreshControlsAsync()
+        {
+            if (IsAuthenticated)
+            {
+                // Switch to background thread
+                await TaskScheduler.Default;
+
+                var client = await new SpotifyClientFactory().GetClientAsync();
+                var currentPlayback = await client.Player.GetCurrentPlayback();
+                var currentPlayingItem = currentPlayback.Item;
+
+                string song = "";
+                if (currentPlayingItem is FullTrack track)
+                {
+                    song = $"{track.Artists.FirstOrDefault().Name} - {track.Name}";
+                }
+
+                // Switch back to UI thread to update UI
+                await this.joinableTaskFactory.SwitchToMainThreadAsync(this.package.DisposalToken);
+
+                this.CurrentlyPlayingItemTitle = song;
             }
         }
 
@@ -91,6 +162,8 @@ namespace VSSpotify
                 await Console.Error.WriteLineAsync(ex.Message);
             }
         }
+
+
 
         private async void SignInButton_Click(object sender, RoutedEventArgs e)
         {

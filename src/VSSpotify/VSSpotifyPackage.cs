@@ -69,7 +69,7 @@ namespace VSSpotify
             var sccStatusBarHost = FindChild<FrameworkElement>(mainWindow, "PART_SccStatusBarHost");
             if (sccStatusBarHost != null && sccStatusBarHost.Parent is DockPanel docPanel)
             {
-                var spotifyPlayerControl = new SpotifyControl();
+                var spotifyPlayerControl = new SpotifyControl(this.JoinableTaskFactory, this);
                 spotifyPlayerControl.SetValue(DockPanel.DockProperty, Dock.Right);
                 docPanel.Children.Insert(docPanel.Children.IndexOf(sccStatusBarHost) + 1, spotifyPlayerControl);
             }

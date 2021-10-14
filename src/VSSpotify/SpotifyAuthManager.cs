@@ -84,7 +84,13 @@ namespace VSSpotify
             {
                 CodeChallengeMethod = "S256",
                 CodeChallenge = challenge,
-                Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.UserReadPrivate }
+                Scope = new[] { 
+                    Scopes.PlaylistReadPrivate, 
+                    Scopes.UserReadPrivate,
+                    Scopes.UserReadCurrentlyPlaying,
+                    Scopes.UserModifyPlaybackState,
+                    Scopes.UserModifyPlaybackState
+                }
             };
 
             var http = new HttpListener();
