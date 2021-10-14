@@ -11,7 +11,10 @@
              xmlns:local="clr-namespace:VSSpotify"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-             DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+             DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"
+             TextElement.Foreground="{DynamicResource {x:Static vsui:EnvironmentColors.StatusBarDefaultTextBrushKey}}"
+             TextElement.FontSize="{DynamicResource VsFont.EnvironmentFontSize}"
+             TextElement.FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}">
     <UserControl.Resources>
         <utilities:BrushToColorConverter x:Key="BrushToColorConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -21,13 +24,30 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="3" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="2" />
+            <!-- Suppress default button style -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource {x:Static vsui:EnvironmentColors.ScrollBarArrowMouseOverBackgroundBrushKey}}" />
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid Background="Transparent" >
-        <StatusBar Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Stretch">
+    <Grid Name="RootControl" Background="{DynamicResource {x:Static vsui:EnvironmentColors.ToolWindowBackgroundBrushKey}}" 
+          theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+        <StatusBar Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Stretch" Padding="0" Margin="0">
             <!-- Sign in and sign out buttons -->
-            <Button x:Name="SignInButton" Click="SignInButton_Click"  theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+            <Button x:Name="SignInButton" Click="SignInButton_Click">
                 <StackPanel Orientation="Horizontal">
                     <imaging:CrispImage Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.AddUser}"/>
                     <imaging:CrispImage Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.InUseByOtherUser}"/>
@@ -35,22 +55,24 @@
             </Button>
 
             <!-- Playback buttons -->
-            <Button x:Name="PreviousButton" Click="Previous_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+            <Button x:Name="PreviousButton" Click="Previous_Click">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.PreviousFrame}"/>
             </Button>
-            <Button x:Name="PlayButton" Click="PlayButton_Click"  theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+            <Button x:Name="PlayButton" Click="PlayButton_Click">
                 <StackPanel Orientation="Horizontal">
                     <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Play}"/>
                     <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Pause}"/>
                 </StackPanel>
             </Button>
-            <Button x:Name="NextButton" Click="NextButton_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+            <Button x:Name="NextButton" Click="NextButton_Click">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.NextFrame}" />
             </Button>
 
-            <Button x:Name="SongTitleButton" Click="SongTitleButton_Click">Song Title</Button>
+            <Button x:Name="SongTitleButton" Click="SongTitleButton_Click" 
+                    Foreground="{DynamicResource {x:Static vsui:ThemedDialogColors.WindowPanelTextBrushKey}}"
+                    Background="{DynamicResource {x:Static vsui:ThemedDialogColors.WindowPanelBrushKey}}">Song Title</Button>
             
-            <Button x:Name="VolumeButton" Click="VolumeButton_Click" theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
+            <Button x:Name="VolumeButton" Click="VolumeButton_Click">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Volume}" />
             </Button>
         </StatusBar>

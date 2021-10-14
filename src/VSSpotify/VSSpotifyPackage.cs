@@ -65,12 +65,13 @@ namespace VSSpotify
             // Now place it into VS status bar
             var mainWindow = Application.Current.MainWindow;
 
-            var resizer = FindChild<FrameworkElement>(mainWindow, "ResizeGripControl");
-            if (resizer != null && resizer.Parent is DockPanel docPanel)
+            // Insert our control before source control compartment
+            var sccStatusBarHost = FindChild<FrameworkElement>(mainWindow, "PART_SccStatusBarHost");
+            if (sccStatusBarHost != null && sccStatusBarHost.Parent is DockPanel docPanel)
             {
                 var spotifyPlayerControl = new SpotifyControl();
-                spotifyPlayerControl.SetValue(DockPanel.DockProperty, Dock.Left);
-                docPanel.Children.Add(spotifyPlayerControl);
+                spotifyPlayerControl.SetValue(DockPanel.DockProperty, Dock.Right);
+                docPanel.Children.Insert(docPanel.Children.IndexOf(sccStatusBarHost) + 1, spotifyPlayerControl);
             }
             else
             {
