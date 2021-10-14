@@ -147,6 +147,7 @@ namespace VSSpotify
                 await this.joinableTaskFactory.SwitchToMainThreadAsync(this.package.DisposalToken);
 
                 this.CurrentlyPlayingItemTitle = song;
+                this.IsPaused = !currentPlayback.IsPlaying;
             }
         }
 
@@ -156,18 +157,22 @@ namespace VSSpotify
         {
             try
             {
+                var client = await new SpotifyClientFactory().GetClientAsync();
+
                 if (isPaused)
                 {
-                    // call Play method
+                    if (await client.Player.ResumePlayback())
+                    {
+                        IsPaused = false;
+                    }
                 }
                 else
                 {
-                    // call pause method
+                    if (await client.Player.PausePlayback())
+                    {
+                        IsPaused = true;
+                    }
                 }
-                IsPaused = !IsPaused;
-                //var client = await new SpotifyClientFactory().GetClientAsync();
-                //var profile = await client.UserProfile.Current();
-                //Console.WriteLine(profile.DisplayName);
             }
             catch (Exception ex)
             {
@@ -201,19 +206,35 @@ namespace VSSpotify
             }
         }
 
-        private void Previous_Click(object sender, RoutedEventArgs e)
+        private async void Previous_Click(object sender, RoutedEventArgs e)
         {
-
+            try
+            {
+                var client = await new SpotifyClientFactory().GetClientAsync();
+                await client.Player.SkipPrevious();
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync(ex.Message);
+            }
         }
 
-        private void NextButton_Click(object sender, RoutedEventArgs e)
+        private async void NextButton_Click(object sender, RoutedEventArgs e)
         {
-
+            try
+            {
+                var client = await new SpotifyClientFactory().GetClientAsync();
+                await client.Player.SkipNext();
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync(ex.Message);
+            }
         }
 
-        private void SongTitleButton_Click(object sender, RoutedEventArgs e)
+        private async void SongTitleButton_Click(object sender, RoutedEventArgs e)
         {
-
+            
         }
 
         private void VolumeButton_Click(object sender, RoutedEventArgs e)

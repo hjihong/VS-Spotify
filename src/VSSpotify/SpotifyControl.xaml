@@ -62,8 +62,8 @@
             <Button x:Name="PlayButton" Click="PlayButton_Click" ToolTip="Spotify Play/Pause"
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
-                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Play}"/>
-                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Pause}"/>
+                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Pause}"/>
+                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Play}"/>
                 </StackPanel>
             </Button>
             <Button x:Name="NextButton" Click="NextButton_Click" ToolTip="Spotify Play Next Song"
