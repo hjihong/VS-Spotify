@@ -19,6 +19,7 @@
         <utilities:BrushToColorConverter x:Key="BrushToColorConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <local:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+        <utilities:VisibleIfNotNullOrEmptyConverter x:Key="VisibleIfNotNullOrEmptyConverter"/>
 
         <Style TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
@@ -80,10 +81,16 @@
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.NextFrame}" />
             </Button>
 
-            <Button x:Name="SongTitleButton" Click="SongTitleButton_Click" MinWidth="50" 
+            <Button x:Name="SongTitleButton" Click="SongTitleButton_Click" MinWidth="70" 
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Foreground="{DynamicResource {x:Static vsui:EnvironmentColors.StatusBarTextBrushKey}}"
-                    Content="{Binding CurrentlyPlayingItemTitle, Mode=OneWay}"/>
+                    Foreground="{DynamicResource {x:Static vsui:EnvironmentColors.StatusBarTextBrushKey}}">
+                <StackPanel Orientation="Horizontal">
+                    <Image x:Name="SongImage" Width="18" Height="18" Source="{Binding CurrentlyPlayingItemUrl}" Margin="0,0,5,0"
+                           Visibility="{Binding CurrentlyPlayingItemUrl, Mode=OneWay, Converter={StaticResource VisibleIfNotNullOrEmptyConverter}}"/>
+                    <TextBlock Text="{Binding CurrentlyPlayingItemTitle, Mode=OneWay}"/>
+                </StackPanel>
+            </Button>
+            
             <Button x:Name="VolumeButton" Click="VolumeButton_Click" ToolTip="Spotify Mute/Unmute"
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
