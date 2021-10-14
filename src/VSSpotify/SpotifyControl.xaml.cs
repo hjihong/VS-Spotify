@@ -44,7 +44,7 @@ namespace VSSpotify
                 {
                     isAuthenticated = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
-                    
+
                     if (!isAuthenticated)
                     {
                         // User just signed out, clean up controls
@@ -97,14 +97,26 @@ namespace VSSpotify
             this.package = package;
 
             InitializeComponent();
-            using (var authManager = new SpotifyAuthManager())
-            {
-                IsAuthenticated = authManager.IsAuthenticated();
-            }
 
             // Start a loop of refreshing controls
             this.joinableTaskFactory.RunAsync(async () =>
             {
+                using (var authManager = new SpotifyAuthManager())
+                {
+                    // Try to silently get credentials first. We only want to show signed
+                    // out if we're not able to refresh credentials silently.
+                    if (!authManager.IsAuthenticated())
+                    {
+                        try
+                        {
+                            await authManager.RefreshCredentialsAsync();
+                        }
+                        catch (Exception) { }
+                    }
+
+                    IsAuthenticated = authManager.IsAuthenticated();
+                }
+
                 while (!this.package.DisposalToken.IsCancellationRequested)
                 {
                     await RefreshControlsAsync();
@@ -143,7 +155,7 @@ namespace VSSpotify
         private async void PlayButton_Click(object sender, RoutedEventArgs e)
         {
             try
-            { 
+            {
                 if (isPaused)
                 {
                     // call Play method

@@ -11,7 +11,7 @@ namespace VSSpotify
         private const string PKCE_ACCESS_TOKEN_KEY = "PKCE_ACCESS_TOKEN";
         private const string PKCE_REFRESH_TOKEN_KEY = "PKCE_REFRESH_TOKEN";
         private const string PKCE_EXPIRY_KEY = "PKCE_EXPIRY";
-        private const string CLIENT_ID = "CLIENT_ID_HERE";
+        private const string CLIENT_ID = "6aafc22137b04db7b5a85715b3413988";
         private readonly TempDictionary _cache;
 
         private string AccessToken
@@ -65,7 +65,7 @@ namespace VSSpotify
             return AccessToken;
         }
 
-        private async Task RefreshCredentialsAsync()
+        public async Task RefreshCredentialsAsync()
         {
             var newResponse = await new OAuthClient().RequestToken(new PKCETokenRefreshRequest(CLIENT_ID, RefreshToken));
             AccessToken = newResponse.AccessToken;
@@ -73,7 +73,7 @@ namespace VSSpotify
             TokenExpiry = GetNewExpiry(newResponse.ExpiresIn);
         }
 
-        private async Task GetNewCredentialsAsync()
+        public async Task GetNewCredentialsAsync()
         {
             var redirectURI = string.Format("http://{0}:{1}/", IPAddress.Loopback, GetCallbackPort());
             var (verifier, challenge) = PKCEUtil.GenerateCodes();
