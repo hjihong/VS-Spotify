@@ -28,6 +28,7 @@ namespace VSSpotify
     {
         private bool isAuthenticated = false;
         private bool isPaused = false;
+        //private int volume;
         private string currentlyPlayingItemTitle;
         private readonly JoinableTaskFactory joinableTaskFactory;
         private readonly VSSpotifyPackage package;
@@ -54,8 +55,12 @@ namespace VSSpotify
             }
         }
 
-        private void OnUserSignedOut()
+        //User signout will pause the music and get rid of the song title.
+        private async void OnUserSignedOut()
         {
+            var client = await new SpotifyClientFactory().GetClientAsync();
+            await client.Player.PausePlayback();
+            this.isPaused = true; 
             this.CurrentlyPlayingItemTitle = "";
         }
 
@@ -74,6 +79,23 @@ namespace VSSpotify
                 }
             }
         }
+
+      /*  public int Volume 
+        {
+            get
+            {
+                return volume;
+            }
+            private set
+            {
+                if (volume != value)
+                {
+                   volume = value;
+                   PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Volume)));
+                }
+                
+            }
+        }*/
 
         public string CurrentlyPlayingItemTitle
         {
@@ -141,18 +163,20 @@ namespace VSSpotify
                 var client = await new SpotifyClientFactory().GetClientAsync();
                 var currentPlayback = await client.Player.GetCurrentPlayback();
                 var currentPlayingItem = currentPlayback.Item;
+                //var currentVolume = 50; // await client.Player.GetCurrent();
 
                 string song = "";
                 if (currentPlayingItem is FullTrack track)
                 {
                     song = $"{track.Artists.FirstOrDefault().Name} - {track.Name}";
                 }
-
+          
                 // Switch back to UI thread to update UI
                 await this.joinableTaskFactory.SwitchToMainThreadAsync(this.package.DisposalToken);
 
                 this.CurrentlyPlayingItemTitle = song;
                 this.IsPaused = !currentPlayback.IsPlaying;
+                //this.Volume = vol;
             }
         }
 
@@ -242,9 +266,21 @@ namespace VSSpotify
             
         }
 
-        private void VolumeButton_Click(object sender, RoutedEventArgs e)
+        private async void VolumeButton_Click(object sender, RoutedEventArgs e)  //, int userSetVol
         {
-
+            //need to set the intial volume 
+            //Part 1 is to get the new volume as an int
+            //Part 2 is to change the current volume
+           /* try
+            {
+                var vol = new PlayerVolumeRequest(userSetVol).VolumePercent; 
+                var client = await new SpotifyClientFactory().GetClientAsync();
+                await client.DeviceObject.volume_percentage; 
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync(ex.Message);
+            }*/
         }
 
         private void OpenInAppButton_Click(object sender, RoutedEventArgs e)
