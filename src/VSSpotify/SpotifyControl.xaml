@@ -58,11 +58,6 @@
                 </StackPanel>
             </Button>
 
-            <Button x:Name="OpenInAppButton" Click="OpenInAppButton_Click" ToolTip="Open in App">
-                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.OpenWebSite}"
-                                    Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            </Button>
-
             <!-- Playback buttons -->
             <Button x:Name="PreviousButton" Click="Previous_Click" ToolTip="Spotify Play Previous Song">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.PreviousFrame}"
@@ -80,10 +75,13 @@
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.NextFrame}" />
             </Button>
 
+            <!-- Song details that will open context in web browser -->
             <Button x:Name="SongTitleButton" Click="SongTitleButton_Click" MinWidth="50" 
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
                     Foreground="{DynamicResource {x:Static vsui:EnvironmentColors.StatusBarTextBrushKey}}"
                     Content="{Binding CurrentlyPlayingItemTitle, Mode=OneWay}"/>
+
+            <!-- Volume button with adjustable slider -->
             <Button x:Name="VolumeButton" Click="VolumeButton_Click" ToolTip="Spotify Mute/Unmute"
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
