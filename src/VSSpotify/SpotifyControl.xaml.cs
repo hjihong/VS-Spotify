@@ -101,6 +101,21 @@ namespace VSSpotify
             // Start a loop of refreshing controls
             this.joinableTaskFactory.RunAsync(async () =>
             {
+                while (!this.package.DisposalToken.IsCancellationRequested)
+                {
+                    await RefreshControlsAsync();
+                    await Task.Delay(1000);
+                }
+
+            }).FileAndForget("vs/spotify/failure");
+        }
+
+        private async Task RefreshControlsAsync()
+        {
+            // If not authenticated, we want to try to refresh the credentials silently
+            // first before showing that the user is logged out.
+            if (!IsAuthenticated)
+            {
                 using (var authManager = new SpotifyAuthManager())
                 {
                     // Try to silently get credentials first. We only want to show signed
@@ -116,18 +131,8 @@ namespace VSSpotify
 
                     IsAuthenticated = authManager.IsAuthenticated();
                 }
+            }
 
-                while (!this.package.DisposalToken.IsCancellationRequested)
-                {
-                    await RefreshControlsAsync();
-                    await Task.Delay(1000);
-                }
-
-            }).FileAndForget("vs/spotify/failure");
-        }
-
-        private async Task RefreshControlsAsync()
-        {
             if (IsAuthenticated)
             {
                 // Switch to background thread
@@ -240,6 +245,11 @@ namespace VSSpotify
         private void VolumeButton_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void OpenInAppButton_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://open.spotify.com");
         }
     }
 }
