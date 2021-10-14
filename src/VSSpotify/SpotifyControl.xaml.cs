@@ -28,6 +28,7 @@ namespace VSSpotify
     {
         private bool isAuthenticated = false;
         private bool isPaused = false;
+        private bool isVolumeExpanded = false;
         private string currentlyPlayingItemTitle;
         private readonly JoinableTaskFactory joinableTaskFactory;
         private readonly VSSpotifyPackage package;
@@ -71,6 +72,22 @@ namespace VSSpotify
                 {
                     isPaused = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPaused)));
+                }
+            }
+        }
+
+        public bool IsVolumeExpanded
+        {
+            get
+            {
+                return isVolumeExpanded;
+            }
+            private set
+            {
+                if (isVolumeExpanded != value)
+                {
+                    isVolumeExpanded = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsVolumeExpanded)));
                 }
             }
         }
@@ -242,9 +259,14 @@ namespace VSSpotify
             
         }
 
-        private void VolumeButton_Click(object sender, RoutedEventArgs e)
+        private async void VolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void VolumeButton_Click(object sender, RoutedEventArgs e)
+        {
+            IsVolumeExpanded = !isVolumeExpanded;
         }
 
         private void OpenInAppButton_Click(object sender, RoutedEventArgs e)

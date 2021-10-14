@@ -43,7 +43,7 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid Name="RootControl" Background="{DynamicResource {x:Static vsui:EnvironmentColors.ToolWindowBackgroundBrushKey}}" 
+    <Grid Name="RootControl" Background="{DynamicResource {x:Static vsui:EnvironmentColors.StatusBarDefaultBrushKey}}" 
           theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushToColorConverter}}">
         <StatusBar Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Stretch" Padding="0" Margin="0">
             <!-- Sign in and sign out buttons -->
@@ -81,10 +81,25 @@
                     Foreground="{DynamicResource {x:Static vsui:ThemedDialogColors.WindowPanelTextBrushKey}}"
                     Background="{DynamicResource {x:Static vsui:EnvironmentColors.ToolWindowBackgroundBrushKey}}" 
                     Content="{Binding CurrentlyPlayingItemTitle, Mode=OneWay}"/>
-
             <Button x:Name="VolumeButton" Click="VolumeButton_Click" ToolTip="Spotify Mute/Unmute"
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Volume}" />
+                <StackPanel>
+                    <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Volume}" />
+                    <Popup IsOpen="{Binding IsVolumeExpanded, Mode=OneWay}" Placement="Top" StaysOpen="False" >
+                        <Border BorderThickness="1" BorderBrush="{DynamicResource {x:Static vsui:EnvironmentColors.DropDownPopupBorderBrushKey}}">
+                            <StackPanel Background="{DynamicResource {x:Static vsui:EnvironmentColors.ToolWindowBackgroundBrushKey}}" >
+                                <TextBlock HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource {x:Static vsui:ThemedDialogColors.WindowPanelTextBrushKey}}"
+                                       Text="{Binding ElementName=VolumeSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" />
+                                <Slider x:Name="VolumeSlider" TickFrequency="1" 
+                                    IsSnapToTickEnabled="True"
+                                    Margin="5" 
+                                    Maximum="100" Orientation="Vertical" Height="100" 
+                                    ValueChanged="VolumeSlider_ValueChanged"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </StackPanel>
             </Button>
         </StatusBar>
     </Grid>
