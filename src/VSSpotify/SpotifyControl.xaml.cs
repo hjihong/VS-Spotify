@@ -120,6 +120,8 @@ namespace VSSpotify
 
             InitializeComponent();
 
+            // If teh control is being created, VS is active
+            this.isVisualStudioActivated = true;
             // Kick in initial refresh
             this.refreshTimer = new Timer(BeginControlRefresh, state: null, dueTime:0, Timeout.Infinite);
 
@@ -129,7 +131,7 @@ namespace VSSpotify
 
         private void BeginControlRefresh(object state)
         {
-            if (this.isAuthenticated && isVisualStudioActivated && !this.package.DisposalToken.IsCancellationRequested)
+            if (this.isVisualStudioActivated && !this.package.DisposalToken.IsCancellationRequested)
             {
 
                 this.joinableTaskFactory.RunAsync(async () =>
@@ -157,7 +159,10 @@ namespace VSSpotify
         private void OnApplicationActivated(object sender, EventArgs e)
         {
             this.isVisualStudioActivated = true;
-            BeginControlRefresh(state: null);
+            if (this.IsAuthenticated)
+            {
+                BeginControlRefresh(state: null);
+            }
         }
 
         private async Task RefreshControlsAsync()
