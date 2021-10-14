@@ -72,7 +72,11 @@
             </Button>
             <Button x:Name="NextButton" Click="NextButton_Click" ToolTip="Spotify Play Next Song"
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.NextFrame}" />
+                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.PreviousFrame}">
+                    <imaging:CrispImage.RenderTransform>
+                        <RotateTransform CenterX="8" CenterY="8" Angle="180" />
+                    </imaging:CrispImage.RenderTransform>
+                </imaging:CrispImage>
             </Button>
 
             <!-- Song details that will open context in web browser -->
