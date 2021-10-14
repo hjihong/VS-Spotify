@@ -321,7 +321,17 @@ namespace VSSpotify
 
         private async void SongTitleButton_Click(object sender, RoutedEventArgs e)
         {
-            
+            try
+            {
+                var client = await new SpotifyClientFactory().GetClientAsync();
+                var currentPlaying = await client.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest());
+                var link = currentPlaying.Context.ExternalUrls["spotify"];
+                System.Diagnostics.Process.Start(link);
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync(ex.Message);
+            }
         }
 
         private async void VolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
