@@ -34,8 +34,11 @@ namespace VSSpotify
             }
             private set
             {
-                isAuthenticated = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
+                if (isAuthenticated != value)
+                {
+                    isAuthenticated = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
+                }
             }
         }
 
@@ -47,15 +50,21 @@ namespace VSSpotify
             }
             private set
             {
-                isPaused = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPaused)));
+                if (isPaused != value)
+                {
+                    isPaused = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPaused)));
+                }
             }
         }
 
         public SpotifyControl()
         {
             InitializeComponent();
-            isAuthenticated = new SpotifyAuthManager().IsAuthenticated();
+            using (var authManager = new SpotifyAuthManager())
+            {
+                IsAuthenticated = authManager.IsAuthenticated();
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -91,14 +100,13 @@ namespace VSSpotify
                 {
                     if (IsAuthenticated)
                     {
-                        // authManager.ClearCredentials();
+                        authManager.ClearCredentials();
                         IsAuthenticated = false;
                     }
                     else
                     {
-                        // await authManager.GetCredentialsAsync();
-                        // IsAuthenticated = !authManager.IsAuthenticated();
-                        IsAuthenticated = true;
+                        await authManager.GetCredentialsAsync();
+                        IsAuthenticated = authManager.IsAuthenticated();
                     }
                 }
             }
