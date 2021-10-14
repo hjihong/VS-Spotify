@@ -89,7 +89,10 @@ namespace VSSpotify
                     Scopes.UserReadPrivate,
                     Scopes.UserReadCurrentlyPlaying,
                     Scopes.UserModifyPlaybackState,
-                    Scopes.UserModifyPlaybackState
+                    Scopes.UserModifyPlaybackState,
+                    Scopes.UserReadPlaybackState,
+                    Scopes.UserReadPlaybackPosition,
+                    Scopes.AppRemoteControl
                 }
             };
 
