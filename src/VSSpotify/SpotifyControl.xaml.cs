@@ -83,11 +83,14 @@ namespace VSSpotify
 
         private async void OnUserSignedOut()
         {
-            var client = await new SpotifyClientFactory().GetClientAsync();
-            await client.Player.PausePlayback();
-            this.isPaused = true; 
-            this.CurrentlyPlayingItemTitle = "";
-            this.currentlyPlayingItemUrl = null;
+            if (!this.isPaused)
+            {
+                var client = await new SpotifyClientFactory().GetClientAsync();
+                await client.Player.PausePlayback();
+                this.isPaused = true;
+                this.CurrentlyPlayingItemTitle = "";
+                this.currentlyPlayingItemUrl = null;
+            }
         }
 
         public bool IsPaused
@@ -253,32 +256,36 @@ namespace VSSpotify
 
                 var client = await new SpotifyClientFactory().GetClientAsync();
                 var currentPlayback = await client.Player.GetCurrentPlayback();
-                var currentPlayingItem = currentPlayback.Item; 
-                int currentVolume = (int)currentPlayback.Device.VolumePercent; 
-
-                string song = null;
-                string songImageUrl = null;
-                if (currentPlayingItem is FullTrack track)
+                // If there's no playback, skip the updates.
+                if (currentPlayback != null)
                 {
-                    song = $"{track.Artists.FirstOrDefault().Name} - {track.Name}";
-                    var image = track.Album.Images.FirstOrDefault();
-                    if (image != null)
+                    var currentPlayingItem = currentPlayback.Item;
+                    int currentVolume = (int)currentPlayback.Device.VolumePercent;
+
+                    string song = null;
+                    string songImageUrl = null;
+                    if (currentPlayingItem is FullTrack track)
                     {
-                        songImageUrl = image.Url;
+                        song = $"{track.Artists.FirstOrDefault().Name} - {track.Name}";
+                        var image = track.Album.Images.FirstOrDefault();
+                        if (image != null)
+                        {
+                            songImageUrl = image.Url;
+                        }
                     }
+
+                    // Switch back to UI thread to update UI
+                    await this.joinableTaskFactory.SwitchToMainThreadAsync(this.package.DisposalToken);
+
+                    this.CurrentlyPlayingItemTitle = song;
+                    this.CurrentlyPlayingItemUrl = songImageUrl;
+                    this.IsPaused = !currentPlayback.IsPlaying;
+                    this.isShuffled = currentPlayback.ShuffleState;
+                    this.Volume = currentVolume;
+
+                    //Manually update Volume Slider UI
+                    VolumeSlider.Value = currentVolume;
                 }
-
-                // Switch back to UI thread to update UI
-                await this.joinableTaskFactory.SwitchToMainThreadAsync(this.package.DisposalToken);
-
-                this.CurrentlyPlayingItemTitle = song;
-                this.CurrentlyPlayingItemUrl = songImageUrl;
-                this.IsPaused = !currentPlayback.IsPlaying;
-                this.isShuffled = currentPlayback.ShuffleState;
-                this.Volume = currentVolume;
-                
-                //Manually update Volume Slider UI
-                VolumeSlider.Value = currentVolume;
             }
         }
 
