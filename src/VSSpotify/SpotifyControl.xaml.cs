@@ -1,21 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Microsoft.VisualStudio.Shell.Interop;
+
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
+
 using SpotifyAPI.Web;
 
 namespace VSSpotify
@@ -29,9 +22,13 @@ namespace VSSpotify
         private bool isAuthenticated = false;
         private bool isPaused = false;
         private bool isShuffled = false;
+        private bool isVolumeExpanded = false;
         private string currentlyPlayingItemTitle;
         private readonly JoinableTaskFactory joinableTaskFactory;
         private readonly VSSpotifyPackage package;
+        private Timer refreshTimer;
+        private bool isVisualStudioActivated;
+        private string currentlyPlayingItemUrl;
 
         public bool IsAuthenticated
         {
@@ -46,7 +43,11 @@ namespace VSSpotify
                     isAuthenticated = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
 
-                    if (!isAuthenticated)
+                    if (isAuthenticated)
+                    {
+                        OnUserSignedIn();
+                    }
+                    else
                     {
                         // User just signed out, clean up controls
                         OnUserSignedOut();
@@ -69,11 +70,17 @@ namespace VSSpotify
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsShuffled)));
                 }
             }
+
+        private void OnUserSignedIn()
+        {
+            // User just logged in, refresh controls
+            BeginControlRefresh(state: null);
         }
 
         private void OnUserSignedOut()
         {
             this.CurrentlyPlayingItemTitle = "";
+            this.currentlyPlayingItemUrl = null;
         }
 
         public bool IsPaused
@@ -88,6 +95,22 @@ namespace VSSpotify
                 {
                     isPaused = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPaused)));
+                }
+            }
+        }
+
+        public bool IsVolumeExpanded
+        {
+            get
+            {
+                return isVolumeExpanded;
+            }
+            private set
+            {
+                if (isVolumeExpanded != value)
+                {
+                    isVolumeExpanded = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsVolumeExpanded)));
                 }
             }
         }
@@ -108,6 +131,22 @@ namespace VSSpotify
             }
         }
 
+        public string CurrentlyPlayingItemUrl
+        {
+            get
+            {
+                return currentlyPlayingItemUrl;
+            }
+            private set
+            {
+                if (currentlyPlayingItemUrl != value)
+                {
+                    currentlyPlayingItemUrl = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentlyPlayingItemUrl)));
+                }
+            }
+        }
+
         public SpotifyControl(JoinableTaskFactory joinableTaskFactory, VSSpotifyPackage package)
         {
             this.joinableTaskFactory = joinableTaskFactory;
@@ -115,16 +154,49 @@ namespace VSSpotify
 
             InitializeComponent();
 
-            // Start a loop of refreshing controls
-            this.joinableTaskFactory.RunAsync(async () =>
-            {
-                while (!this.package.DisposalToken.IsCancellationRequested)
-                {
-                    await RefreshControlsAsync();
-                    await Task.Delay(1000);
-                }
+            // If teh control is being created, VS is active
+            this.isVisualStudioActivated = true;
+            // Kick in initial refresh
+            this.refreshTimer = new Timer(BeginControlRefresh, state: null, dueTime:0, Timeout.Infinite);
 
-            }).FileAndForget("vs/spotify/failure");
+            Application.Current.Activated += OnApplicationActivated;
+            Application.Current.Deactivated += OnApplicationDeactivated;
+        }
+
+        private void BeginControlRefresh(object state)
+        {
+            if (this.isVisualStudioActivated && !this.package.DisposalToken.IsCancellationRequested)
+            {
+
+                this.joinableTaskFactory.RunAsync(async () =>
+                {
+                    if (!this.package.DisposalToken.IsCancellationRequested)
+                    {
+                        await RefreshControlsAsync();
+                    }
+
+                // If user is authenticated and VS is active, tick again in 5s
+                if (this.isVisualStudioActivated && this.IsAuthenticated)
+                    {
+                        this.refreshTimer.Change(dueTime: 5000, period: Timeout.Infinite);
+                    }
+
+                }).FileAndForget("vs/spotify/failure");
+            }
+        }
+
+        private void OnApplicationDeactivated(object sender, EventArgs e)
+        {
+            this.isVisualStudioActivated = false;
+        }
+
+        private void OnApplicationActivated(object sender, EventArgs e)
+        {
+            this.isVisualStudioActivated = true;
+            if (this.IsAuthenticated)
+            {
+                BeginControlRefresh(state: null);
+            }
         }
 
         private async Task RefreshControlsAsync()
@@ -159,16 +231,23 @@ namespace VSSpotify
                 var currentPlayback = await client.Player.GetCurrentPlayback();
                 var currentPlayingItem = currentPlayback.Item;
 
-                string song = "";
+                string song = null;
+                string songImageUrl = null;
                 if (currentPlayingItem is FullTrack track)
                 {
                     song = $"{track.Artists.FirstOrDefault().Name} - {track.Name}";
+                    var image = track.Album.Images.FirstOrDefault();
+                    if (image != null)
+                    {
+                        songImageUrl = image.Url;
+                    }
                 }
 
                 // Switch back to UI thread to update UI
                 await this.joinableTaskFactory.SwitchToMainThreadAsync(this.package.DisposalToken);
 
                 this.CurrentlyPlayingItemTitle = song;
+                this.CurrentlyPlayingItemUrl = songImageUrl;
                 this.IsPaused = !currentPlayback.IsPlaying;
                 this.isShuffled = currentPlayback.ShuffleState;
             }
@@ -203,8 +282,6 @@ namespace VSSpotify
             }
         }
 
-
-
         private async void SignInButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -235,6 +312,8 @@ namespace VSSpotify
             {
                 var client = await new SpotifyClientFactory().GetClientAsync();
                 await client.Player.SkipPrevious();
+                // Spotify needs a bit of delay to actually switch to next song
+                this.refreshTimer.Change(dueTime: 500, period: Timeout.Infinite);
             }
             catch (Exception ex)
             {
@@ -248,6 +327,8 @@ namespace VSSpotify
             {
                 var client = await new SpotifyClientFactory().GetClientAsync();
                 await client.Player.SkipNext();
+                // Spotify needs a bit of delay to actually switch to next song
+                this.refreshTimer.Change(dueTime: 500, period: Timeout.Infinite);
             }
             catch (Exception ex)
             {
@@ -270,12 +351,27 @@ namespace VSSpotify
 
         private async void SongTitleButton_Click(object sender, RoutedEventArgs e)
         {
-            
+            try
+            {
+                var client = await new SpotifyClientFactory().GetClientAsync();
+                var currentPlaying = await client.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest());
+                var link = currentPlaying.Context.ExternalUrls["spotify"];
+                System.Diagnostics.Process.Start(link);
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync(ex.Message);
+            }
+        }
+
+        private async void VolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void VolumeButton_Click(object sender, RoutedEventArgs e)
         {
-
+            IsVolumeExpanded = !isVolumeExpanded;
         }
 
         private void OpenInAppButton_Click(object sender, RoutedEventArgs e)
