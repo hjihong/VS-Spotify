@@ -28,6 +28,7 @@ namespace VSSpotify
     {
         private bool isAuthenticated = false;
         private bool isPaused = false;
+        private bool isShuffled = false;
         private string currentlyPlayingItemTitle;
         private readonly JoinableTaskFactory joinableTaskFactory;
         private readonly VSSpotifyPackage package;
@@ -50,6 +51,22 @@ namespace VSSpotify
                         // User just signed out, clean up controls
                         OnUserSignedOut();
                     }
+                }
+            }
+        }
+
+        public bool IsShuffled
+        {
+            get
+            {
+                return IsShuffled;
+            }
+            private set
+            {
+                if (isShuffled != value)
+                {
+                    isShuffled = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsShuffled)));
                 }
             }
         }
@@ -153,6 +170,7 @@ namespace VSSpotify
 
                 this.CurrentlyPlayingItemTitle = song;
                 this.IsPaused = !currentPlayback.IsPlaying;
+                this.isShuffled = currentPlayback.ShuffleState;
             }
         }
 
@@ -230,6 +248,19 @@ namespace VSSpotify
             {
                 var client = await new SpotifyClientFactory().GetClientAsync();
                 await client.Player.SkipNext();
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync(ex.Message);
+            }
+        }
+
+        private async void ShuffleButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var client = await new SpotifyClientFactory().GetClientAsync();
+                await client.Player.SetShuffle(new PlayerShuffleRequest(!isShuffled)); 
             }
             catch (Exception ex)
             {

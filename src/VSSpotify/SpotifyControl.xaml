@@ -75,6 +75,10 @@
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.NextFrame}" />
             </Button>
+            <Button x:Name="ShuffleButton" Click="ShuffleButton_Click" ToolTip="Spotify Shuffle"
+                    Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Link}" />
+            </Button>
 
             <Button x:Name="SongTitleButton" Click="SongTitleButton_Click" MinWidth="50" 
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
