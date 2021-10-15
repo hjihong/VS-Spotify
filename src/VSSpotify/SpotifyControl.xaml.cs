@@ -22,6 +22,7 @@ namespace VSSpotify
         private bool isAuthenticated = false;
         private bool isPaused = false;
         private bool isShuffled = false;
+        private int volume;
         private bool isVolumeExpanded = false;
         private string currentlyPlayingItemTitle;
         private readonly JoinableTaskFactory joinableTaskFactory;
@@ -77,8 +78,11 @@ namespace VSSpotify
             BeginControlRefresh(state: null);
         }
 
-        private void OnUserSignedOut()
+        private async void OnUserSignedOut()
         {
+            var client = await new SpotifyClientFactory().GetClientAsync();
+            await client.Player.PausePlayback();
+            this.isPaused = true; 
             this.CurrentlyPlayingItemTitle = "";
             this.currentlyPlayingItemUrl = null;
         }
@@ -96,6 +100,23 @@ namespace VSSpotify
                     isPaused = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPaused)));
                 }
+            }
+        }
+
+        public int Volume 
+        {
+            get
+            {
+                return volume;
+            }
+            private set
+            {
+                if (volume != value)
+                {
+                   volume = value;
+                   PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Volume)));
+                }
+                
             }
         }
 
@@ -224,12 +245,13 @@ namespace VSSpotify
 
             if (IsAuthenticated)
             {
-                // Switch to background thread
+                // Switch to background threadn
                 await TaskScheduler.Default;
 
                 var client = await new SpotifyClientFactory().GetClientAsync();
                 var currentPlayback = await client.Player.GetCurrentPlayback();
-                var currentPlayingItem = currentPlayback.Item;
+                var currentPlayingItem = currentPlayback.Item; 
+                int currentVolume = (int)currentPlayback.Device.VolumePercent; 
 
                 string song = null;
                 string songImageUrl = null;
@@ -250,6 +272,10 @@ namespace VSSpotify
                 this.CurrentlyPlayingItemUrl = songImageUrl;
                 this.IsPaused = !currentPlayback.IsPlaying;
                 this.isShuffled = currentPlayback.ShuffleState;
+                this.Volume = currentVolume;
+                
+                //Manually update Volume Slider UI
+                VolumeSlider.Value = currentVolume;
             }
         }
 
@@ -366,7 +392,24 @@ namespace VSSpotify
 
         private async void VolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
+            //Part 1 is to get the new volume as an int
+            int volumeLevel = 0;
+            if (sender is Slider volumeSlider) 
+            { 
+                volumeLevel = (int)Math.Round(volumeSlider.Value); 
+            }
 
+            //Part 2 is to change the current volume
+            try
+             {
+                 var vol = new PlayerVolumeRequest(volumeLevel); 
+                 var client = await new SpotifyClientFactory().GetClientAsync();
+                 await client.Player.SetVolume(vol);
+             }
+             catch (Exception ex)
+             {
+                 await Console.Error.WriteLineAsync(ex.Message);
+             }
         }
 
         private void VolumeButton_Click(object sender, RoutedEventArgs e)
