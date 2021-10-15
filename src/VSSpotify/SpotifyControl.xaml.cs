@@ -28,6 +28,7 @@ namespace VSSpotify
         private readonly VSSpotifyPackage package;
         private Timer refreshTimer;
         private bool isVisualStudioActivated;
+        private string currentlyPlayingItemUrl;
 
         public bool IsAuthenticated
         {
@@ -67,6 +68,7 @@ namespace VSSpotify
             await client.Player.PausePlayback();
             this.isPaused = true; 
             this.CurrentlyPlayingItemTitle = "";
+            this.currentlyPlayingItemUrl = null;
         }
 
         public bool IsPaused
@@ -130,6 +132,22 @@ namespace VSSpotify
                 {
                     currentlyPlayingItemTitle = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentlyPlayingItemTitle)));
+                }
+            }
+        }
+
+        public string CurrentlyPlayingItemUrl
+        {
+            get
+            {
+                return currentlyPlayingItemUrl;
+            }
+            private set
+            {
+                if (currentlyPlayingItemUrl != value)
+                {
+                    currentlyPlayingItemUrl = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentlyPlayingItemUrl)));
                 }
             }
         }
@@ -219,16 +237,23 @@ namespace VSSpotify
                 var currentPlayingItem = currentPlayback.Item; 
                 int currentVolume = (int)currentPlayback.Device.VolumePercent; 
 
-                string song = "";
+                string song = null;
+                string songImageUrl = null;
                 if (currentPlayingItem is FullTrack track)
                 {
                     song = $"{track.Artists.FirstOrDefault().Name} - {track.Name}";
+                    var image = track.Album.Images.FirstOrDefault();
+                    if (image != null)
+                    {
+                        songImageUrl = image.Url;
+                    }
                 }
 
                 // Switch back to UI thread to update UI
                 await this.joinableTaskFactory.SwitchToMainThreadAsync(this.package.DisposalToken);
 
                 this.CurrentlyPlayingItemTitle = song;
+                this.CurrentlyPlayingItemUrl = songImageUrl;
                 this.IsPaused = !currentPlayback.IsPlaying;
                 this.Volume = currentVolume;
                 
@@ -266,8 +291,6 @@ namespace VSSpotify
             }
         }
 
-
-
         private async void SignInButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -298,6 +321,8 @@ namespace VSSpotify
             {
                 var client = await new SpotifyClientFactory().GetClientAsync();
                 await client.Player.SkipPrevious();
+                // Spotify needs a bit of delay to actually switch to next song
+                this.refreshTimer.Change(dueTime: 500, period: Timeout.Infinite);
             }
             catch (Exception ex)
             {
@@ -311,6 +336,8 @@ namespace VSSpotify
             {
                 var client = await new SpotifyClientFactory().GetClientAsync();
                 await client.Player.SkipNext();
+                // Spotify needs a bit of delay to actually switch to next song
+                this.refreshTimer.Change(dueTime: 500, period: Timeout.Infinite);
             }
             catch (Exception ex)
             {
@@ -320,6 +347,17 @@ namespace VSSpotify
 
         private async void SongTitleButton_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                var client = await new SpotifyClientFactory().GetClientAsync();
+                var currentPlaying = await client.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest());
+                var link = currentPlaying.Context.ExternalUrls["spotify"];
+                System.Diagnostics.Process.Start(link);
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync(ex.Message);
+            }
         }
 
         private async void VolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
