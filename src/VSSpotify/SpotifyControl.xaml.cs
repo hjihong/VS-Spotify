@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
+using Microsoft.Internal.VisualStudio.Shell;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
 
@@ -282,7 +284,48 @@ namespace VSSpotify
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public string PlayNextTooltip
+        {
+            get
+            {
+                var shortcut = KeyBindingHelper.GetKeyBinding(SpotifyPlayNextCommand.CommandSet, (int)SpotifyPlayNextCommand.CommandId, VSConstants.GUID_VSStandardCommandSet97);
+                return string.IsNullOrEmpty(shortcut) ? "Spotify Play Next" : $"Spotify Play Next ({shortcut})";
+            }
+        }
+
+        public string PlayPreviousTooltip
+        {
+            get
+            {
+                var shortcut = KeyBindingHelper.GetKeyBinding(SpotifyPlayPreviousCommand.CommandSet, (int)SpotifyPlayPreviousCommand.CommandId, VSConstants.GUID_VSStandardCommandSet97);
+                return string.IsNullOrEmpty(shortcut) ? "Spotify Play Previous" : $"Spotify Play Previous ({shortcut})";
+            }
+        }
+
+        public string PlayTooltip
+        {
+            get
+            {
+                var shortcut = KeyBindingHelper.GetKeyBinding(SpotifyPlayOrPauseCommand.CommandSet, (int)SpotifyPlayOrPauseCommand.CommandId, VSConstants.GUID_VSStandardCommandSet97);
+                return string.IsNullOrEmpty(shortcut) ? "Spotify Play" : $"Spotify Play ({shortcut})";
+            }
+        }
+
+        public string PauseTooltip
+        {
+            get
+            {
+                var shortcut = KeyBindingHelper.GetKeyBinding(SpotifyPlayOrPauseCommand.CommandSet, (int)SpotifyPlayOrPauseCommand.CommandId, VSConstants.GUID_VSStandardCommandSet97);
+                return string.IsNullOrEmpty(shortcut) ? "Spotify Pause" : $"Spotify Pause ({shortcut})";
+            }
+        }
+
         private async void PlayButton_Click(object sender, RoutedEventArgs e)
+        {
+            await PlayOrPauseAsync();
+        }
+
+        internal async Task PlayOrPauseAsync()
         {
             try
             {
@@ -335,6 +378,11 @@ namespace VSSpotify
 
         private async void Previous_Click(object sender, RoutedEventArgs e)
         {
+            await PlayPreviousAsync();
+        }
+
+        internal async Task PlayPreviousAsync()
+        {
             try
             {
                 var client = await new SpotifyClientFactory().GetClientAsync();
@@ -349,6 +397,11 @@ namespace VSSpotify
         }
 
         private async void NextButton_Click(object sender, RoutedEventArgs e)
+        {
+            await PlayNextAsync();
+        }
+
+        internal async Task PlayNextAsync()
         {
             try
             {

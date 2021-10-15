@@ -86,18 +86,18 @@
             </Button>
 
             <!-- Playback buttons -->
-            <Button x:Name="PreviousButton" Click="Previous_Click" ToolTip="Spotify Play Previous Song">
+            <Button x:Name="PreviousButton" Click="Previous_Click" ToolTip="{Binding PlayPreviousTooltip}">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.PreviousFrame}"
                                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </Button>
             <Button x:Name="PlayButton" Click="PlayButton_Click"
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
-                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Pause}" ToolTip="Spotify Pause"/>
-                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Play}" ToolTip="Spotify Play"/>
+                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Pause}"  ToolTip="{Binding PauseTooltip}"/>
+                    <imaging:CrispImage Visibility="{Binding IsPaused, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.Play}"  ToolTip="{Binding PlayTooltip}"/>
                 </StackPanel>
             </Button>
-            <Button x:Name="NextButton" Click="NextButton_Click" ToolTip="Spotify Play Next Song"
+            <Button x:Name="NextButton" Click="NextButton_Click" ToolTip="{Binding PlayNextTooltip}"
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <imaging:CrispImage Width="16" Height="16" Moniker="{x:Static imageCatalog:KnownMonikers.PreviousFrame}">
                     <imaging:CrispImage.RenderTransform>
