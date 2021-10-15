@@ -21,7 +21,7 @@ namespace VSSpotify
     {
         private bool isAuthenticated = false;
         private bool isPaused = false;
-        //private int volume;
+        private int volume;
         private bool isVolumeExpanded = false;
         private string currentlyPlayingItemTitle;
         private readonly JoinableTaskFactory joinableTaskFactory;
@@ -61,7 +61,7 @@ namespace VSSpotify
             BeginControlRefresh(state: null);
         }
 
-        private void OnUserSignedOut()
+        private async void OnUserSignedOut()
         {
             var client = await new SpotifyClientFactory().GetClientAsync();
             await client.Player.PausePlayback();
@@ -85,7 +85,7 @@ namespace VSSpotify
             }
         }
 
-      /*  public int Volume 
+        public int Volume 
         {
             get
             {
@@ -99,8 +99,6 @@ namespace VSSpotify
                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Volume)));
                 }
                 
-            }
-        }*/
             }
         }
 
@@ -213,26 +211,29 @@ namespace VSSpotify
 
             if (IsAuthenticated)
             {
-                // Switch to background thread
+                // Switch to background threadn
                 await TaskScheduler.Default;
 
                 var client = await new SpotifyClientFactory().GetClientAsync();
                 var currentPlayback = await client.Player.GetCurrentPlayback();
-                var currentPlayingItem = currentPlayback.Item;
-                //var currentVolume = 50; // await client.Player.GetCurrent();
+                var currentPlayingItem = currentPlayback.Item; 
+                int currentVolume = (int)currentPlayback.Device.VolumePercent; 
 
                 string song = "";
                 if (currentPlayingItem is FullTrack track)
                 {
                     song = $"{track.Artists.FirstOrDefault().Name} - {track.Name}";
                 }
-          
+
                 // Switch back to UI thread to update UI
                 await this.joinableTaskFactory.SwitchToMainThreadAsync(this.package.DisposalToken);
 
                 this.CurrentlyPlayingItemTitle = song;
                 this.IsPaused = !currentPlayback.IsPlaying;
-                //this.Volume = vol;
+                this.Volume = currentVolume;
+                
+                //Manually update Volume Slider UI
+                VolumeSlider.Value = currentVolume;
             }
         }
 
@@ -319,27 +320,28 @@ namespace VSSpotify
 
         private async void SongTitleButton_Click(object sender, RoutedEventArgs e)
         {
-            
         }
 
-        private async void VolumeButton_Click(object sender, RoutedEventArgs e)  //, int userSetVol
-        {
-            //need to set the intial volume 
-            //Part 1 is to get the new volume as an int
-            //Part 2 is to change the current volume
-           /* try
-            {
-                var vol = new PlayerVolumeRequest(userSetVol).VolumePercent; 
-                var client = await new SpotifyClientFactory().GetClientAsync();
-                await client.DeviceObject.volume_percentage; 
-            }
-            catch (Exception ex)
-            {
-                await Console.Error.WriteLineAsync(ex.Message);
-            }*/
         private async void VolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
+            //Part 1 is to get the new volume as an int
+            int volumeLevel = 0;
+            if (sender is Slider volumeSlider) 
+            { 
+                volumeLevel = (int)Math.Round(volumeSlider.Value); 
+            }
 
+            //Part 2 is to change the current volume
+            try
+             {
+                 var vol = new PlayerVolumeRequest(volumeLevel); 
+                 var client = await new SpotifyClientFactory().GetClientAsync();
+                 await client.Player.SetVolume(vol);
+             }
+             catch (Exception ex)
+             {
+                 await Console.Error.WriteLineAsync(ex.Message);
+             }
         }
 
         private void VolumeButton_Click(object sender, RoutedEventArgs e)
