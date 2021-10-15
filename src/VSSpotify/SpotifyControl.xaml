@@ -47,6 +47,32 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style TargetType="Button" x:Key="LeftAlignedButton">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="2" />
+            <!-- Suppress default button style -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <SolidColorBrush Color="White" Opacity="0.2" />
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid Name="RootControl" Background="Transparent" 
           theming:ImageThemingUtilities.ImageBackgroundColor="{Binding Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DockPanel}}, Converter={StaticResource BrushToColorConverter}}">
@@ -79,14 +105,15 @@
                     </imaging:CrispImage.RenderTransform>
                 </imaging:CrispImage>
             </Button>
-            <Button x:Name="SongTitleButton" Click="SongTitleButton_Click" MinWidth="70" 
+            <Button x:Name="SongTitleButton" Click="SongTitleButton_Click" Width="150" Style="{StaticResource LeftAlignedButton}"
                     Visibility="{Binding IsAuthenticated, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
                     Foreground="{DynamicResource {x:Static vsui:EnvironmentColors.StatusBarTextBrushKey}}">
-                <StackPanel Orientation="Horizontal">
-                    <Image x:Name="SongImage" Width="18" Height="18" Source="{Binding CurrentlyPlayingItemUrl}" Margin="0,0,5,0"
+                <DockPanel>
+                    <Image x:Name="SongImage" Width="18" Height="18" Source="{Binding CurrentlyPlayingItemUrl}" Margin="0,0,4,0"
+                           DockPanel.Dock="Left"
                            Visibility="{Binding CurrentlyPlayingItemUrl, Mode=OneWay, Converter={StaticResource VisibleIfNotNullOrEmptyConverter}}"/>
-                    <TextBlock Text="{Binding CurrentlyPlayingItemTitle, Mode=OneWay}"/>
-                </StackPanel>
+                    <TextBlock Text="{Binding CurrentlyPlayingItemTitle, Mode=OneWay}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                </DockPanel>
             </Button>
             <!-- Volume button with adjustable slider -->
             <Button x:Name="VolumeButton" Click="VolumeButton_Click" ToolTip="Spotify Mute/Unmute"
