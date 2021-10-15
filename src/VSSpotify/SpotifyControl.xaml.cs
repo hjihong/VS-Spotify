@@ -21,6 +21,7 @@ namespace VSSpotify
     {
         private bool isAuthenticated = false;
         private bool isPaused = false;
+        private bool isShuffled = false;
         private int volume;
         private bool isVolumeExpanded = false;
         private string currentlyPlayingItemTitle;
@@ -55,6 +56,21 @@ namespace VSSpotify
                 }
             }
         }
+
+        public bool IsShuffled
+        {
+            get
+            {
+                return IsShuffled;
+            }
+            private set
+            {
+                if (isShuffled != value)
+                {
+                    isShuffled = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsShuffled)));
+                }
+            }
 
         private void OnUserSignedIn()
         {
@@ -255,6 +271,7 @@ namespace VSSpotify
                 this.CurrentlyPlayingItemTitle = song;
                 this.CurrentlyPlayingItemUrl = songImageUrl;
                 this.IsPaused = !currentPlayback.IsPlaying;
+                this.isShuffled = currentPlayback.ShuffleState;
                 this.Volume = currentVolume;
                 
                 //Manually update Volume Slider UI
@@ -338,6 +355,19 @@ namespace VSSpotify
                 await client.Player.SkipNext();
                 // Spotify needs a bit of delay to actually switch to next song
                 this.refreshTimer.Change(dueTime: 500, period: Timeout.Infinite);
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync(ex.Message);
+            }
+        }
+
+        private async void ShuffleButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var client = await new SpotifyClientFactory().GetClientAsync();
+                await client.Player.SetShuffle(new PlayerShuffleRequest(!isShuffled)); 
             }
             catch (Exception ex)
             {
