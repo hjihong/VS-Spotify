@@ -71,6 +71,7 @@ namespace VSSpotify
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsShuffled)));
                 }
             }
+        }
 
         private void OnUserSignedIn()
         {
